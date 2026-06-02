@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pair Programming Extension - Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen">
+
+    <div id="pantalla-login" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center p-4 transition-opacity duration-500">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="text-5xl mb-3">👨‍💻</div>
+                <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500">Unirse a la Sesión</h2>
+                <p class="text-slate-400 text-xs font-mono mt-2">// Revisión Colaborativa de Código</p>
+            </div>
+
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Tu nombre de desarrollador</label>
+                    <input type="text" id="input-nombre" placeholder="Ej: Dylan..." 
+                        class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-slate-200 font-mono text-sm focus:outline-none focus:border-emerald-500 transition-colors" 
+                        onkeydown="if(event.key==='Enter') iniciarSesion()">
+                </div>
+
+                <div class="bg-emerald-500/5 border border-emerald-500/10 rounded-lg p-3 flex items-center gap-2 text-emerald-400 font-mono text-[11px]">
+                    👥 Cupo máximo: 2 devs simultáneos (CS1)
+                </div>
+
+                <button onclick="iniciarSesion()" class="w-full bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-emerald-400 font-bold py-3 rounded-lg border border-emerald-500/20 transition-all mt-2 shadow-lg shadow-emerald-500/10">
+                    Conectarme a la sesión →
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="app-dashboard" class="max-w-6xl mx-auto space-y-6 p-6 hidden">
+        
+        <header class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
+            <div>
+                <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500 flex items-center gap-2">
+                    <i data-lucide="terminal" class="text-emerald-400"></i>
+                    Pair Programming Extension
+                </h1>
+                <p class="text-slate-400 text-sm mt-1">Capa de Interfaz de Usuario para Revisión Colaborativa</p>
+            </div>
+            <div class="bg-slate-950 px-4 py-2 rounded-lg border border-slate-800 text-sm font-mono flex items-center gap-3">
+                <span class="text-slate-400">ID Tarea:</span>
+                <span id="display-tarea" class="text-emerald-400 font-bold">TASK-101</span>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <div class="lg:col-span-2 space-y-6">
+                
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-md">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-semibold flex items-center gap-2">
+                            <i data-lucide="users" class="text-teal-400"></i> Participantes (Límite: 2)
+                        </h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col justify-between gap-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-pink-500/10 rounded-lg flex items-center justify-center border border-pink-500/20"><span class="text-pink-400 font-bold text-xs font-mono">JH</span></div>
+                                    <div><h3 class="font-medium text-sm text-slate-200">Jhael</h3></div>
+                                </div>
+                            </div>
+                            <div id="badge-Jhael" class="flex items-center gap-1.5 bg-slate-900 text-slate-500 text-[10px] px-2 py-1 rounded-full border border-slate-800 font-medium w-fit">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> Desconectado
+                            </div>
+                            <div class="flex gap-2 mt-1">
+                                <button onclick="conectar('Jhael')" class="flex-1 bg-slate-900 hover:bg-emerald-600/20 hover:text-emerald-400 text-slate-300 text-[11px] font-semibold py-1.5 rounded border border-slate-800 transition">Entrar</button>
+                                <button onclick="desconectar('Jhael')" class="bg-slate-900 hover:bg-rose-600/20 hover:text-rose-400 text-slate-400 text-[11px] py-1.5 px-2 rounded border border-slate-800 transition">Salir</button>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950 p-4 rounded-xl border border-emerald-900/30 flex flex-col justify-between gap-3 relative overflow-hidden">
+                            <div class="absolute -right-3 -top-3 bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-4 py-1 rotate-45">TÚ</div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center border border-blue-500/20">
+                                        <span id="ui-iniciales" class="text-blue-400 font-bold text-xs font-mono">YO</span>
+                                    </div>
+                                    <div><h3 id="ui-nombre" class="font-medium text-sm text-slate-200">Tu Nombre</h3></div>
+                                </div>
+                            </div>
+                            <div id="badge-dinamico" class="flex items-center gap-1.5 bg-slate-900 text-slate-500 text-[10px] px-2 py-1 rounded-full border border-slate-800 font-medium w-fit">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> Desconectado
+                            </div>
+                            <div class="flex gap-2 mt-1">
+                                <button onclick="conectar(miNombre)" class="flex-1 bg-slate-900 hover:bg-emerald-600/20 hover:text-emerald-400 text-slate-300 text-[11px] font-semibold py-1.5 rounded border border-slate-800 transition">Entrar</button>
+                                <button onclick="desconectar(miNombre)" class="bg-slate-900 hover:bg-rose-600/20 hover:text-rose-400 text-slate-400 text-[11px] py-1.5 px-2 rounded border border-slate-800 transition">Salir</button>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950 p-4 rounded-xl border border-rose-900/30 flex flex-col justify-between gap-3 relative overflow-hidden">
+                            <div class="absolute -right-3 -top-3 bg-rose-500/20 text-rose-400 text-[9px] font-bold px-4 py-1 rotate-45">INTRUSO</div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center border border-purple-500/20"><span class="text-purple-400 font-bold text-xs font-mono">CA</span></div>
+                                    <div><h3 class="font-medium text-sm text-slate-200">Carlos</h3></div>
+                                </div>
+                            </div>
+                            <div id="badge-Carlos" class="flex items-center gap-1.5 bg-slate-900 text-slate-500 text-[10px] px-2 py-1 rounded-full border border-slate-800 font-medium w-fit">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> Desconectado
+                            </div>
+                            <div class="flex gap-2 mt-1">
+                                <button onclick="conectar('Carlos')" class="flex-1 bg-slate-900 hover:bg-emerald-600/20 hover:text-emerald-400 text-slate-300 text-[11px] font-semibold py-1.5 rounded border border-slate-800 transition">Entrar</button>
+                                <button onclick="desconectar('Carlos')" class="bg-slate-900 hover:bg-rose-600/20 hover:text-rose-400 text-slate-400 text-[11px] py-1.5 px-2 rounded border border-slate-800 transition">Salir</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-md">
+                    <h2 class="text-lg font-semibold flex items-center gap-2 mb-4">
+                        <i data-lucide="file-code" class="text-emerald-400"></i> Editor de Archivos Colaborativo
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-2">Pestaña activa de Jhael</label>
+                            <select id="file-Jhael" onchange="actualizarArchivo()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-teal-500">
+                                <option value="auth_service.py">auth_service.py</option>
+                                <option value="controllers.py">controllers.py</option>
+                                <option value="database.py">database.py</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-2">Pestaña activa de <span id="ui-label-file" class="text-emerald-400">Tú</span></label>
+                            <select id="file-dinamico" onchange="actualizarArchivo()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-teal-500">
+                                <option value="auth_service.py">auth_service.py</option>
+                                <option value="controllers.py">controllers.py</option>
+                                <option value="database.py">database.py</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="panel-sincronizacion" class="p-3 mb-4 rounded-xl border border-slate-800 flex items-center justify-between transition-all">
+                        <div class="flex items-center gap-3">
+                            <div id="icono-sincronizacion" class="w-8 h-8 rounded-lg flex items-center justify-center">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <h4 id="titulo-sincronizacion" class="text-sm font-semibold">Estado de Sincronización</h4>
+                                <p id="desc-sincronizacion" class="text-xs text-slate-500">Esperando conexión...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl overflow-hidden border border-slate-800">
+                        <div class="bg-slate-950 px-4 py-2 border-b border-slate-800 flex items-center gap-2">
+                            <div class="flex gap-1.5">
+                                <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
+                                <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                                <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                            </div>
+                            <span id="titulo-archivo-visor" class="text-xs text-slate-400 font-mono ml-2">auth_service.py</span>
+                        </div>
+                        <div class="bg-slate-900 p-4 h-40 overflow-y-auto">
+                            <pre><code id="codigo-visor" class="text-sm font-mono text-emerald-300">
+# Selecciona un archivo para ver el código en tiempo real...
+                            </code></pre>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-md flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 bg-amber-500/10 rounded-lg flex items-center justify-center border border-amber-500/20">
+                            <i data-lucide="clock" class="text-amber-400 w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs text-slate-400 font-medium">Última Desconexión</h4>
+                            <p id="ultima-conexion" class="text-sm font-bold text-slate-200 font-mono mt-0.5">Ninguna</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-md flex flex-col h-[400px]">
+                    <h3 class="text-sm font-semibold flex items-center gap-2 mb-3 text-slate-300">
+                        <i data-lucide="scroll-text" class="text-teal-400 w-4 h-4"></i> Registro del Sistema
+                    </h3>
+                    <div id="consola-logs" class="bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-xs text-slate-400 space-y-2 overflow-y-auto flex-1 h-full scrollbar-thin">
+                        <div class="text-slate-600">[SISTEMA] Inicializando logs...</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const URL_API = "http://localhost:5000/api";
+        let TASK_ID = "TASK-102"; // Se mantiene fija para no complicar la demostración
+        let miNombre = ""; 
+
+        const contenidoArchivos = {
+            "auth_service.py": `import jwt\nfrom fastapi import HTTPException\n\ndef verificar_token(token: str):\n    try:\n        payload = jwt.decode(token, "SECRET")\n        return payload\n    except:\n        raise HTTPException(status_code=401)`,
+            "controllers.py": `from db import obtener_conexion\n\nclass UsuarioController:\n    def __init__(self):\n        self.db = obtener_conexion()`,
+            "database.py": `import os\nimport mysql.connector\n\ndef obtener_conexion():\n    print("Conectado a BD")`
+        };
+
+        function iniciarSesion() {
+            const inputVal = document.getElementById('input-nombre').value.trim();
+            
+            if (!inputVal) {
+                alert("Por favor, ingresa tu nombre de desarrollador.");
+                return;
+            }
+
+            miNombre = inputVal;
+
+            document.getElementById('ui-nombre').innerText = miNombre;
+            document.getElementById('ui-iniciales').innerText = miNombre.substring(0, 2).toUpperCase();
+            document.getElementById('ui-label-file').innerText = miNombre;
+            document.getElementById('display-tarea').innerText = TASK_ID;
+
+            document.getElementById('badge-dinamico').id = `badge-${miNombre}`;
+            document.getElementById('file-dinamico').id = `file-${miNombre}`;
+
+            const loginPantalla = document.getElementById('pantalla-login');
+            loginPantalla.style.opacity = '0';
+            setTimeout(() => {
+                loginPantalla.classList.add('hidden');
+                document.getElementById('app-dashboard').classList.remove('hidden');
+            }, 300); 
+        }
+
+        async function conectar(usuario) {
+            try {
+                const response = await fetch(`${URL_API}/sesion/${TASK_ID}/conectar`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({usuario: usuario})
+                });
+                const data = await response.json();
+                
+                if (!data.success) {
+                    const consola = document.getElementById('consola-logs');
+                    const logElement = document.createElement('div');
+                    logElement.className = "flex justify-between border-b border-rose-900/50 pb-1 gap-2 bg-rose-500/10 px-2 rounded mt-1";
+                    logElement.innerHTML = `<span><span class="text-rose-500 font-bold">⚠ BLOQUEADO:</span> Intento de ${usuario} rechazado.</span><span class="text-slate-600 font-mono text-[11px] mt-1">${obtenerHoraExacta()}</span>`;
+                    consola.appendChild(logElement);
+                    consola.scrollTop = consola.scrollHeight;
+                    
+                    alert(`¡ACCESO DENEGADO!\nTu backend bloqueó a ${usuario} porque el cupo de Pair Programming ya está lleno.`);
+                    return;
+                }
+
+                const badge = document.getElementById(`badge-${usuario}`);
+                if(badge) {
+                    badge.className = "flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 text-[10px] px-2 py-1 rounded-full border border-emerald-500/20 font-semibold animate-pulse w-fit";
+                    badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> En línea`;
+                }
+                
+                agregarLog(usuario, "Conectado");
+                actualizarArchivo();
+            } catch (e) {
+                alert("Error: Asegúrate de tener el app.py de tu compañero corriendo en la terminal.");
+            }
+        }
+
+        async function desconectar(usuario) {
+            await fetch(`${URL_API}/sesion/${TASK_ID}/desconectar`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({usuario: usuario})
+            });
+
+            const badge = document.getElementById(`badge-${usuario}`);
+            if(badge) {
+                badge.className = "flex items-center gap-1.5 bg-slate-950 text-slate-500 text-[10px] px-2 py-1 rounded-full border border-slate-800 font-medium w-fit";
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> Desconectado`;
+            }
+            
+            document.getElementById('ultima-conexion').innerText = `${usuario} (${obtenerHoraExacta()})`;
+            agregarLog(usuario, "Desconectado");
+            actualizarArchivo();
+        }
+
+        async function actualizarArchivo() {
+            const archJhael = document.getElementById('file-Jhael').value;
+            const archMio = document.getElementById(`file-${miNombre}`).value;
+
+            await fetch(`${URL_API}/sesion/${TASK_ID}/abrir-archivo`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({usuario: 'Jhael', archivo: archJhael}) });
+            const res = await fetch(`${URL_API}/sesion/${TASK_ID}/abrir-archivo`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({usuario: miNombre, archivo: archMio}) });
+            const data = await res.json();
+            
+            const panel = document.getElementById('panel-sincronizacion');
+            const icono = document.getElementById('icono-sincronizacion');
+            const titulo = document.getElementById('titulo-sincronizacion');
+            const desc = document.getElementById('desc-sincronizacion');
+            const visorCodigo = document.getElementById('codigo-visor');
+            const tituloVisor = document.getElementById('titulo-archivo-visor');
+
+            if (data.sincronizado) {
+                panel.className = "p-3 mb-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 flex items-center justify-between shadow-lg shadow-emerald-500/5";
+                icono.className = "w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-500/10 text-emerald-400 animate-spin-slow";
+                titulo.className = "text-sm font-semibold text-emerald-400";
+                desc.className = "text-xs text-emerald-500/70";
+                desc.innerText = data.sync_status || "Sincronizados (Validado por el Backend)";
+                
+                tituloVisor.innerText = archMio;
+                visorCodigo.innerText = contenidoArchivos[archMio];
+                visorCodigo.className = "text-sm font-mono text-emerald-300";
+            } else {
+                panel.className = "p-3 mb-4 rounded-xl border border-amber-500/20 bg-amber-500/5 flex items-center justify-between shadow-lg shadow-amber-500/5";
+                icono.className = "w-8 h-8 rounded-lg flex items-center justify-center bg-amber-500/10 text-amber-400";
+                titulo.className = "text-sm font-semibold text-amber-400";
+                desc.className = "text-xs text-amber-500/70";
+                desc.innerText = data.sync_status || "Desincronizados (Pestañas diferentes)";
+
+                tituloVisor.innerText = "Desincronizado";
+                visorCodigo.innerText = "# Esperando que ambos desarrolladores estén\n# en la misma pestaña para renderizar el código...";
+                visorCodigo.className = "text-sm font-mono text-slate-500 italic";
+            }
+        }
+
+        function obtenerHoraExacta() { return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
+        
+        function agregarLog(usuario, evento) {
+            const consola = document.getElementById('consola-logs');
+            const logElement = document.createElement('div');
+            logElement.className = "flex justify-between border-b border-slate-900/50 pb-1 gap-2";
+            const textoEvento = evento === "Conectado" ? `<span class="text-emerald-400 font-medium">✓ ${usuario} ingresó</span>` : `<span class="text-rose-400 font-medium">✗ ${usuario} se retiró</span>`;
+            logElement.innerHTML = `<span>${textoEvento}</span><span class="text-slate-600 font-mono text-[11px]">${obtenerHoraExacta()}</span>`;
+            consola.appendChild(logElement);
+            consola.scrollTop = consola.scrollHeight;
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

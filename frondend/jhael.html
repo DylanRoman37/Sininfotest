@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sesión Pair Programming — Jhael</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:       #07090f;
+      --surface:  #0d1018;
+      --panel:    #101420;
+      --border:   #181c2a;
+      --border2:  #222638;
+      --accent:   #00f5a0;
+      --accdim:   #00c07a;
+      --accent2:  #4f9eff;
+      --danger:   #ff5252;
+      --warn:     #ffb547;
+      --text:     #d4d8e8;
+      --bright:   #ffffff;
+      --dim:      #555875;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+    /* ── LOGIN SCREEN ── */
+    #loginScreen {
+      position:fixed;inset:0;z-index:200;
+      background:var(--bg);
+      display:flex;align-items:center;justify-content:center;padding:1rem;
+    }
+    body::before{
+      content:'';position:fixed;inset:0;
+      background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
+      background-size:44px 44px;pointer-events:none;z-index:0;
+    }
+    .orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:.12;pointer-events:none;animation:drift 9s ease-in-out infinite alternate;}
+    .orb1{width:380px;height:380px;background:var(--accent);top:-100px;left:-100px;}
+    .orb2{width:320px;height:320px;background:#7b61ff;bottom:-80px;right:-80px;animation-delay:-4s;}
+    @keyframes drift{from{transform:translate(0,0)}to{transform:translate(26px,16px)}}
+
+    .login-card{
+      position:relative;z-index:1;
+      background:var(--panel);border:1px solid var(--border2);border-radius:22px;
+      padding:2.8rem 2.4rem;width:100%;max-width:440px;
+      display:flex;flex-direction:column;gap:1.6rem;
+      animation:popIn .35s ease;
+    }
+    @keyframes popIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+    .login-top{text-align:center;}
+    .login-emoji{font-size:2.8rem;margin-bottom:.5rem;}
+    .login-card h2{font-size:1.5rem;font-weight:800;color:var(--bright);}
+    .login-card .sub{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--dim);margin-top:.35rem;}
+
+    .field{display:flex;flex-direction:column;gap:.45rem;}
+    .flabel{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--dim);}
+    .finput,.fselect{
+      background:var(--surface);border:1px solid var(--border2);border-radius:10px;
+      padding:.75rem 1rem;color:var(--bright);
+      font-family:'JetBrains Mono',monospace;font-size:.9rem;
+      outline:none;width:100%;transition:border-color .2s;
+    }
+    .finput:focus,.fselect:focus{border-color:var(--accent);}
+    .fselect option{background:var(--surface);}
+
+    .login-limit{
+      display:flex;align-items:center;gap:.6rem;
+      background:rgba(0,245,160,.05);border:1px solid rgba(0,245,160,.15);
+      border-radius:10px;padding:.7rem 1rem;
+      font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--accent);
+    }
+
+    .err-box{
+      background:rgba(255,82,82,.08);border:1px solid rgba(255,82,82,.25);
+      border-radius:10px;padding:.7rem 1rem;
+      font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--danger);
+      display:none;
+    }
+    .err-box.show{display:block;}
+
+    .btn-join{
+      background:var(--accent);color:#07090f;border:none;border-radius:12px;
+      padding:.9rem;font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;
+      cursor:pointer;width:100%;transition:all .2s;
+    }
+    .btn-join:hover{background:var(--accdim);}
+    .btn-join:disabled{opacity:.4;cursor:not-allowed;}
+
+    .back-link{
+      text-align:center;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--dim);
+    }
+    .back-link a{color:var(--dim);text-decoration:none;}
+    .back-link a:hover{color:var(--accent);}
+
+    /* ── APP SHELL (hidden until logged in) ── */
+    #appShell{display:none;flex:1;flex-direction:column;}
+
+    /* topbar */
+    .topbar{
+      background:var(--surface);border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 1.4rem;height:54px;position:sticky;top:0;z-index:100;gap:1rem;
+    }
+    .tbLeft{display:flex;align-items:center;gap:.9rem;}
+    .back-btn{
+      font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--dim);
+      text-decoration:none;border:1px solid var(--border);border-radius:8px;
+      padding:.32rem .75rem;transition:all .2s;
+    }
+    .back-btn:hover{color:var(--accent);border-color:var(--accent);}
+    .task-chip{
+      font-family:'JetBrains Mono',monospace;font-size:.68rem;
+      background:rgba(0,245,160,.08);color:var(--accent);
+      border:1px solid rgba(0,245,160,.2);border-radius:6px;padding:.2rem .55rem;
+    }
+    .tb-title{font-size:.88rem;font-weight:700;color:var(--bright);}
+    .tbRight{display:flex;align-items:center;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--accent);}
+    
+    /* 🟢 CORRECCIÓN: Animación suave del punto de sincronización */
+    .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 3s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:1; transform:scale(1)}50%{opacity:.6; transform:scale(1.1)}}
+
+    /* main grid */
+    .main{flex:1;display:grid;grid-template-columns:270px 1fr 290px;height:calc(100vh - 54px);overflow:hidden;}
+
+    /* ── SIDEBAR LEFT ── */
+    .sbl{background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:1.1rem;display:flex;flex-direction:column;gap:1.4rem;}
+    .sec-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);padding-bottom:.45rem;border-bottom:1px solid var(--border);}
+
+    /* participants */
+    .p-list{display:flex;flex-direction:column;gap:.5rem;margin-top:.7rem;}
+    .p-item{display:flex;align-items:center;gap:.65rem;padding:.65rem;background:var(--panel);border-radius:10px;border:1px solid var(--border);}
+    .p-avatar{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.82rem;flex-shrink:0;background:rgba(0,245,160,.08);color:var(--accent);border:1px solid rgba(0,245,160,.18);}
+    .p-name{font-size:.85rem;font-weight:700;color:var(--bright);}
+    .p-status{font-family:'JetBrains Mono',monospace;font-size:.65rem;display:flex;align-items:center;gap:.28rem;}
+    .sdot{width:5px;height:5px;border-radius:50%;}
+    .sdot.online{background:var(--accent);box-shadow:0 0 5px var(--accent);}
+    .sdot.offline{background:var(--danger);}
+
+    /* 🟢 CORRECCIÓN: Selección de archivos */
+    .file-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:.9rem;margin-top:.7rem;}
+    .file-row{display:flex;flex-direction:column;gap:.6rem;margin-top:.5rem;}
+    .file-row select{
+      width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:8px;
+      padding:.6rem .7rem;color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:.75rem;outline:none;cursor:pointer;
+    }
+    .file-row select:focus{border-color:var(--accent);}
+    
+    /* 🟢 CORRECCIÓN: Botón "Abrir Archivo" más visible */
+    .bsm{
+      background:var(--accent); color:#07090f; border:none; border-radius:8px;
+      padding:.6rem; font-family:'Syne',sans-serif; font-weight:800; font-size:.78rem;
+      cursor:pointer; width:100%; transition:all .2s; box-shadow:0 2px 10px rgba(0,245,160,.2);
+    }
+    .bsm:hover{background:var(--accdim); transform:translateY(-1px);}
+    
+    .sync-badge{margin-top:.9rem;padding:.55rem .75rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:600;background:rgba(255,181,71,.07);border:1px solid rgba(255,181,71,.2);color:var(--warn);}
+    .sync-badge.ok{background:rgba(0,245,160,.07);border-color:rgba(0,245,160,.2);color:var(--accent);}
+    .f-list{margin-top:.6rem;display:flex;flex-direction:column;gap:.35rem;}
+    .f-item{display:flex;justify-content:space-between;padding:.38rem .55rem;background:rgba(255,255,255,.03);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:.7rem;}
+    .f-user{color:var(--accent);}
+    .f-name{color:var(--dim);}
+
+    /* cs checklist */
+    .cs-list{display:flex;flex-direction:column;gap:.38rem;margin-top:.7rem;}
+    .cs-item{display:flex;align-items:center;gap:.55rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--dim);}
+    .cs-box{width:13px;height:13px;border-radius:3px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:.55rem;flex-shrink:0;transition:all .3s;}
+    .cs-box.done{background:rgba(0,245,160,.12);border-color:var(--accent);color:var(--accent);}
+
+    .btn-leave{background:rgba(255,82,82,.07);border:1px solid rgba(255,82,82,.18);color:var(--danger);border-radius:10px;padding:.62rem;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;width:100%;margin-top:auto;transition:all .2s;}
+    .btn-leave:hover{background:rgba(255,82,82,.14);}
+
+    /* ── CHAT CENTER ── */
+    .chat{display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+    .tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);padding:0 1rem;}
+    .tab{padding:.8rem 1.1rem;font-size:.8rem;font-weight:700;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:.38rem;}
+    .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+    .tab:hover:not(.active){color:var(--text);}
+    .tcnt{background:rgba(0,245,160,.1);color:var(--accent);border-radius:100px;padding:.08rem .38rem;font-size:.62rem;font-family:'JetBrains Mono',monospace;}
+
+    .msgs{flex:1;overflow-y:auto;padding:1.1rem;display:flex;flex-direction:column;gap:.9rem;scroll-behavior:smooth;}
+
+    .empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:.8rem;}
+    .empty-ico{font-size:2.2rem;}
+
+    .bubble{display:flex;gap:.65rem;max-width:85%;animation:msgIn .22s ease;}
+    @keyframes msgIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+    .bubble.me{align-self:flex-end;flex-direction:row-reverse;}
+
+    .b-avatar{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.72rem;flex-shrink:0;margin-top:2px;}
+    .b-avatar.green{background:rgba(0,245,160,.1);color:var(--accent);border:1px solid rgba(0,245,160,.18);}
+    .b-avatar.blue{background:rgba(79,158,255,.1);color:var(--accent2);border:1px solid rgba(79,158,255,.18);}
+
+    .b-inner{display:flex;flex-direction:column;gap:.18rem;}
+    .b-meta{display:flex;align-items:center;gap:.45rem;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--dim);}
+    .bubble.me .b-meta{flex-direction:row-reverse;}
+    .b-author{font-weight:700;color:var(--text);}
+    .b-text{background:var(--panel);border:1px solid var(--border);border-radius:12px;border-top-left-radius:3px;padding:.65rem .85rem;font-size:.86rem;line-height:1.55;}
+    .bubble.me .b-text{background:rgba(0,245,160,.06);border-color:rgba(0,245,160,.14);border-top-left-radius:12px;border-top-right-radius:3px;}
+    .bubble.shared-b .b-text{background:rgba(79,158,255,.06);border-color:rgba(79,158,255,.22);}
+    .shared-tag{display:inline-flex;align-items:center;gap:.28rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--accent2);background:rgba(79,158,255,.08);border:1px solid rgba(79,158,255,.18);border-radius:100px;padding:.12rem .45rem;}
+
+    /* input */
+    .input-area{border-top:1px solid var(--border);background:var(--surface);padding:.9rem 1.1rem;display:flex;flex-direction:column;gap:.6rem;}
+    .input-row{display:flex;gap:.6rem;align-items:flex-end;}
+    .tarea{flex:1;background:var(--panel);border:1px solid var(--border2);border-radius:12px;padding:.7rem .9rem;color:var(--bright);font-family:'Syne',sans-serif;font-size:.88rem;outline:none;resize:none;min-height:42px;max-height:110px;transition:border-color .2s;line-height:1.4;}
+    .tarea:focus{border-color:var(--accent);}
+    .btn-send{background:var(--accent);color:#07090f;border:none;border-radius:12px;padding:.7rem 1.1rem;font-family:'Syne',sans-serif;font-weight:800;font-size:.88rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
+    .btn-send:hover{background:var(--accdim);}
+    .btn-send:disabled{opacity:.35;cursor:not-allowed;}
+    .inp-opts{display:flex;align-items:center;gap:1rem;}
+    .tog-label{display:flex;align-items:center;gap:.45rem;cursor:pointer;font-size:.76rem;color:var(--dim);user-select:none;}
+    .tog-label input{display:none;}
+    .tog{width:32px;height:17px;background:var(--border2);border-radius:100px;position:relative;transition:background .2s;}
+    .tog::after{content:'';position:absolute;width:11px;height:11px;background:white;border-radius:50%;top:3px;left:3px;transition:transform .2s;}
+    .tog-label input:checked+.tog{background:var(--accent);}
+    .tog-label input:checked+.tog::after{transform:translateX(15px);}
+    .hint{font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--dim);}
+
+    /* ── SIDEBAR RIGHT ── */
+    .sbr{background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+    .sbr-head{padding:.9rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .sbr-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);}
+    .btn-save{background:rgba(0,245,160,.07);border:1px solid rgba(0,245,160,.18);color:var(--accent);border-radius:8px;padding:.32rem .65rem;font-family:'Syne',sans-serif;font-weight:700;font-size:.7rem;cursor:pointer;transition:all .2s;}
+    .btn-save:hover{background:rgba(0,245,160,.14);}
+    .h-list{flex:1;overflow-y:auto;padding:.75rem;display:flex;flex-direction:column;gap:.45rem;}
+    .h-item{padding:.65rem;background:var(--panel);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;gap:.22rem;animation:msgIn .2s ease;}
+    .h-top{display:flex;justify-content:space-between;align-items:center;}
+    .h-user{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;color:var(--accent);}
+    .h-time{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--dim);}
+    .h-chip{display:inline-block;padding:.09rem .38rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:700;text-transform:uppercase;}
+    .ch-con{background:rgba(0,245,160,.09);color:var(--accent);}
+    .ch-dis{background:rgba(255,82,82,.09);color:var(--danger);}
+    .ch-cmt{background:rgba(255,255,255,.04);color:var(--dim);}
+    .ch-shr{background:rgba(79,158,255,.09);color:var(--accent2);}
+    .ch-fil{background:rgba(255,181,71,.09);color:var(--warn);}
+    .h-detail{font-size:.76rem;color:var(--text);line-height:1.4;word-break:break-word;}
+
+    ::-webkit-scrollbar{width:3px;}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
+
+    .toast{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%) translateY(16px);background:var(--panel);border:1px solid var(--border2);border-radius:11px;padding:.68rem 1.1rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text);z-index:9999;opacity:0;transition:all .28s;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+    .toast.ok{border-color:rgba(0,245,160,.3);color:var(--accent);}
+    .toast.er{border-color:rgba(255,82,82,.3);color:var(--danger);}
+  </style>
+</head>
+<body>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+
+  <div id="loginScreen">
+    <div class="login-card">
+      <div class="login-top">
+        <div class="login-emoji">👨‍💻</div>
+        <h2>Unirse a la Sesión</h2>
+        <p class="sub">// Historia de Usuario · Jhael</p>
+      </div>
+
+      <div class="field">
+        <label class="flabel">Tu nombre de usuario</label>
+        <input class="finput" id="uInput" type="text" placeholder="Escribe tu nombre…" maxlength="40"
+          onkeydown="if(event.key==='Enter') joinSession()"/>
+      </div>
+
+      <div class="login-limit">
+        👥 Máximo 2 desarrolladores por sesión (CS1)
+      </div>
+
+      <div class="err-box" id="errBox"></div>
+
+      <button class="btn-join" id="joinBtn" onclick="joinSession()">Conectarme →</button>
+
+      <p class="back-link"><a href="index.html">← Volver al menú principal</a></p>
+    </div>
+  </div>
+
+  <div id="appShell">
+    <div class="topbar">
+      <div class="tbLeft">
+        <a href="index.html" class="back-btn">← Menú</a>
+        <span class="task-chip" id="taskChip">TASK-101</span>
+        <span class="tb-title">Sesión Pair Programming</span>
+      </div>
+      <div class="tbRight">
+        <div class="sync-dot"></div>
+        Auto-sync activo (CS5)
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="sbl">
+
+        <div>
+          <div class="sec-title">👥 Participantes — CS1 · CS7</div>
+          <div class="p-list" id="pList">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:.73rem;color:var(--dim);padding:.8rem 0;text-align:center;">Cargando…</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sec-title">📂 Archivo en tiempo real — CS2</div>
+          <div class="file-box">
+            
+            <div class="file-row">
+              <select id="fileInput">
+                <option value="auth_service.py">auth_service.py</option>
+                <option value="controllers.py">controllers.py</option>
+                <option value="database.py">database.py</option>
+              </select>
+              <button class="bsm" onclick="openFile()">Abrir Archivo →</button>
+            </div>
+
+            <div class="sync-badge" id="syncBadge">⏳ Sin archivos abiertos</div>
+            <div class="f-list" id="fList"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sec-title">✅ Condiciones de satisfacción</div>
+          <div class="cs-list">
+            <div class="cs-item"><div class="cs-box" id="cs1">✓</div>CS1 · 2 devs simultáneos</div>
+            <div class="cs-item"><div class="cs-box" id="cs2">✓</div>CS2 · Mismo archivo RT</div>
+            <div class="cs-item"><div class="cs-box" id="cs3">✓</div>CS3 · Autor en comentario</div>
+            <div class="cs-item"><div class="cs-box" id="cs4">✓</div>CS4 · Sección compartida</div>
+            <div class="cs-item"><div class="cs-box" id="cs5">✓</div>CS5 · Auto-sincronización</div>
+            <div class="cs-item"><div class="cs-box" id="cs6">✓</div>CS6 · Timestamp</div>
+            <div class="cs-item"><div class="cs-box" id="cs7">✓</div>CS7 · Estado conexión</div>
+            <div class="cs-item"><div class="cs-box" id="cs8">✓</div>CS8 · Historial en tarea</div>
+          </div>
+        </div>
+
+        <button class="btn-leave" onclick="leaveSession()">⏻ Salir de la sesión</button>
+      </div>
+
+      <div class="chat">
+        <div class="tabs">
+          <div class="tab active" id="tabG" onclick="switchTab('general')">
+            💬 General <span class="tcnt" id="cntG">0</span>
+          </div>
+          <div class="tab" id="tabS" onclick="switchTab('shared')">
+            🔗 Compartidos <span class="tcnt" id="cntS">0</span>
+          </div>
+        </div>
+
+        <div class="msgs" id="msgs">
+          <div class="empty" id="emptyMsg">
+            <div class="empty-ico">💬</div>
+            <span>Aún no hay comentarios</span>
+          </div>
+        </div>
+
+        <div class="input-area">
+          <div class="input-row">
+            <textarea class="tarea" id="cInput" placeholder="Escribe un comentario sobre el código…" rows="1"
+              onkeydown="onKey(event)"></textarea>
+            <button class="btn-send" id="sendBtn" onclick="sendComment()" disabled>Enviar</button>
+          </div>
+          <div class="inp-opts">
+            <label class="tog-label">
+              <input type="checkbox" id="sharedChk"/>
+              <span class="tog"></span>
+              Compartido (CS4)
+            </label>
+            <span class="hint">Enter envía · Shift+Enter nueva línea</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sbr">
+        <div class="sbr-head">
+          <span class="sbr-title">📋 Historial — CS6 · CS8</span>
+          <button class="btn-save" onclick="saveHistory()">💾 Guardar</button>
+        </div>
+        <div class="h-list" id="hList">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--dim);text-align:center;padding:2rem 0;">
+            El historial aparecerá aquí
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  const API = 'http://127.0.0.1:5000/api';
+  let me = null, task = 'TASK-101', tab = 'general', comments = [], poll = null;
+
+  /* ── JOIN ── */
+  async function joinSession() {
+    const name = document.getElementById('uInput').value.trim();
+    task = 'TASK-101';
+    const err = document.getElementById('errBox');
+    const btn = document.getElementById('joinBtn');
+    if (!name) { showErr('Escribe tu nombre de usuario'); return; }
+
+    btn.disabled = true; btn.textContent = 'Conectando…';
+    err.classList.remove('show');
+
+    try {
+      const r = await fetch(`${API}/sesion/${task}/conectar`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ usuario: name })
+      });
+      const d = await r.json();
+      if (!d.success) { showErr(d.message || 'No se pudo conectar'); btn.disabled=false; btn.textContent='Conectarme →'; return; }
+
+      me = name;
+      document.getElementById('taskChip').textContent = task;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appShell').style.display = 'flex';
+      document.getElementById('sendBtn').disabled = false;
+      markCS('cs1'); markCS('cs5');
+      toast(`✅ ${me} conectado`, 'ok');
+      await refreshAll();
+      poll = setInterval(refreshAll, 4000);
+    } catch(e) {
+      showErr('No se puede conectar al servidor. ¿Está corriendo python app.py?');
+      btn.disabled=false; btn.textContent='Conectarme →';
+    }
+  }
+
+  function showErr(msg) {
+    const b = document.getElementById('errBox');
+    b.textContent = msg; b.classList.add('show');
+  }
+
+  /* ── REFRESH ── */
+  async function refreshAll() {
+    await Promise.all([fetchEstado(), fetchComments(), fetchHistory()]);
+  }
+
+  async function fetchEstado() {
+    try {
+      const d = await (await fetch(`${API}/sesion/${task}/estado`)).json();
+      renderParticipants(d.participantes_memoria || {});
+      renderFiles(d.archivos_abiertos || {}, d.sincronizado);
+      if (d.history_saved) markCS('cs8');
+    } catch(e){}
+  }
+
+  async function fetchComments() {
+    try {
+      comments = await (await fetch(`${API}/sesion/${task}/comentarios`)).json();
+      renderComments();
+    } catch(e){}
+  }
+
+  async function fetchHistory() {
+    try {
+      const d = await (await fetch(`${API}/sesion/${task}/historial`)).json();
+      renderHistory(d);
+    } catch(e){}
+  }
+
+  /* ── SEND ── */
+  async function sendComment() {
+    const txt = document.getElementById('cInput').value.trim();
+    const shared = document.getElementById('sharedChk').checked;
+    if (!txt || !me) return;
+    document.getElementById('sendBtn').disabled = true;
+    try {
+      const r = await fetch(`${API}/sesion/${task}/comentar`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ usuario:me, texto:txt, compartido:shared })
+      });
+      const d = await r.json();
+      if (d.success) {
+        document.getElementById('cInput').value = '';
+        markCS('cs3'); markCS('cs6');
+        if (shared) markCS('cs4');
+        await refreshAll();
+      }
+    } catch(e){ toast('Error al enviar','er'); }
+    document.getElementById('sendBtn').disabled = false;
+  }
+
+  function onKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendComment();} }
+
+  /* ── OPEN FILE ── */
+  async function openFile() {
+    // 🟢 CORRECCIÓN: Leemos el valor del <select>
+    const f = document.getElementById('fileInput').value.trim();
+    if (!f||!me) { toast('Selecciona un archivo','er'); return; }
+    try {
+      const d = await (await fetch(`${API}/sesion/${task}/abrir-archivo`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({usuario:me,archivo:f})
+      })).json();
+      markCS('cs2');
+      toast(d.sync_status, d.sincronizado?'ok':'');
+      await fetchEstado();
+    } catch(e){ toast('Error','er'); }
+  }
+
+  /* ── LEAVE ── */
+  async function leaveSession() {
+    if (!me) return;
+    clearInterval(poll);
+    try {
+      const d = await (await fetch(`${API}/sesion/${task}/desconectar`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({usuario:me})
+      })).json();
+      if(d.history_saved) markCS('cs8');
+      toast(`${me} desconectado. Historial guardado.`,'ok');
+      me = null;
+      document.getElementById('sendBtn').disabled = true;
+      await fetchEstado(); await fetchHistory();
+      
+      // 🟢 Redirigir al inicio después de salir
+      setTimeout(() => { window.location.href = "index.html"; }, 1500);
+      
+    } catch(e){}
+  }
+
+  /* ── SAVE HISTORY ── */
+  async function saveHistory() {
+    try {
+      const d = await (await fetch(`${API}/sesion/${task}/guardar-historial`,{method:'POST'})).json();
+      if(d.success){ markCS('cs8'); toast(`✅ Historial guardado · ${d.history_linked_to_task}`,'ok'); }
+    } catch(e){ toast('Error al guardar','er'); }
+  }
+
+  /* ── TABS ── */
+  function switchTab(t) {
+    tab = t;
+    document.getElementById('tabG').classList.toggle('active', t==='general');
+    document.getElementById('tabS').classList.toggle('active', t==='shared');
+    renderComments();
+  }
+
+  /* ── RENDER PARTICIPANTS ── */
+  function renderParticipants(parts) {
+    const el = document.getElementById('pList');
+    const entries = Object.entries(parts);
+    if (!entries.length) { el.innerHTML='<div style="font-family:\'JetBrains Mono\',monospace;font-size:.73rem;color:var(--dim);padding:.8rem 0;text-align:center;">Sin participantes</div>'; return; }
+    markCS('cs7');
+    el.innerHTML = entries.map(([u,st])=>`
+      <div class="p-item">
+        <div class="p-avatar">${u.charAt(0).toUpperCase()}</div>
+        <div>
+          <div class="p-name">${esc(u)}</div>
+          <div class="p-status"><div class="sdot ${st}"></div><span style="color:${st==='online'?'var(--accent)':'var(--danger)'}">${st}</span></div>
+        </div>
+      </div>`).join('');
+  }
+
+  /* ── RENDER FILES ── */
+  function renderFiles(files, sync) {
+    const badge = document.getElementById('syncBadge');
+    const list  = document.getElementById('fList');
+    const entries = Object.entries(files);
+    if (!entries.length) { badge.textContent='⏳ Sin archivos abiertos'; badge.className='sync-badge'; list.innerHTML=''; return; }
+    list.innerHTML = entries.map(([u,f])=>`<div class="f-item"><span class="f-user">${esc(u)}</span><span class="f-name">${esc(f)}</span></div>`).join('');
+    if (sync) { badge.textContent='✅ Sincronizados — Mismo archivo'; badge.className='sync-badge ok'; markCS('cs2'); }
+    else       { badge.textContent='⚠️ Desincronizados — Archivos distintos'; badge.className='sync-badge'; }
+  }
+
+  /* ── RENDER COMMENTS ── */
+  function renderComments() {
+    const el = document.getElementById('msgs');
+    const filtered = tab==='shared' ? comments.filter(c=>c.compartido) : comments.filter(c=>!c.compartido);
+    document.getElementById('cntG').textContent = comments.filter(c=>!c.compartido).length;
+    document.getElementById('cntS').textContent = comments.filter(c=>c.compartido).length;
+
+    if (!comments.length) { el.innerHTML='<div class="empty"><div class="empty-ico">💬</div><span>Aún no hay comentarios</span></div>'; return; }
+    if (!filtered.length) { el.innerHTML=`<div class="empty"><div class="empty-ico">${tab==='shared'?'🔗':'💬'}</div><span>Sin comentarios aquí</span></div>`; return; }
+
+    el.innerHTML = filtered.map(c=>{
+      const isMine = c.usuario===me;
+      const time = c.timestamp?c.timestamp.slice(11,16):'';
+      const sharedTag = c.compartido?`<span class="shared-tag">🔗 Compartido</span>`:'';
+      return `
+        <div class="bubble ${isMine?'me':''} ${c.compartido?'shared-b':''}">
+          <div class="b-avatar ${isMine?'green':'blue'}">${c.usuario.charAt(0).toUpperCase()}</div>
+          <div class="b-inner">
+            <div class="b-meta"><span class="b-author">${esc(c.usuario)}</span><span>${time}</span>${sharedTag}</div>
+            <div class="b-text">${esc(c.texto)}</div>
+          </div>
+        </div>`;
+    }).join('');
+    el.scrollTop = el.scrollHeight;
+  }
+
+  /* ── RENDER HISTORY ── */
+  function renderHistory(items) {
+    const el = document.getElementById('hList');
+    if (!items.length) return;
+    markCS('cs8');
+    const chipMap = {conectado:'ch-con',desconectado:'ch-dis',comment:'ch-cmt',comment_shared:'ch-shr',abrir_archivo:'ch-fil'};
+    el.innerHTML = items.map(i=>`
+      <div class="h-item">
+        <div class="h-top">
+          <span class="h-user">${esc(i.usuario)}</span>
+          <span class="h-time">${i.timestamp?i.timestamp.slice(11,19):''}</span>
+        </div>
+        <div><span class="h-chip ${chipMap[i.accion]||'ch-cmt'}">${esc(i.accion)}</span></div>
+        ${i.detalle?`<div class="h-detail">${esc(i.detalle)}</div>`:''}
+      </div>`).join('');
+  }
+
+  /* ── HELPERS ── */
+  function markCS(id){ const e=document.getElementById(id); if(e) e.classList.add('done'); }
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function toast(msg,type=''){
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.className=`toast ${type} show`;
+    setTimeout(()=>t.className=`toast ${type}`,3000);
+  }
+
+  document.getElementById('cInput').addEventListener('input',function(){
+    this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,110)+'px';
+  });
+</script>
+</body>
+</html>

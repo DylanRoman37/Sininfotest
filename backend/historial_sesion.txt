@@ -1,0 +1,4 @@
+[2026-06-02 01:34:32] SISTEMA: El usuario Dylan se ha Conectado.
+[2026-06-02 01:34:34] SISTEMA: El usuario Jhael se ha Conectado.
+[2026-06-02 02:38:19] SISTEMA: El usuario Jhael se ha Conectado.
+[2026-06-02 02:38:21] SISTEMA: El usuario Dylan se ha Conectado.
