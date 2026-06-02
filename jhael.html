@@ -254,14 +254,6 @@
           onkeydown="if(event.key==='Enter') joinSession()"/>
       </div>
 
-      <div class="field">
-        <label class="flabel">Tarea a revisar</label>
-        <select class="fselect" id="tSelect">
-          <option value="TASK-101">TASK-101 · Módulo de autenticación</option>
-          <option value="TASK-102">TASK-102 · Controlador de usuarios</option>
-        </select>
-      </div>
-
       <div class="login-limit">
         👥 Máximo 2 desarrolladores por sesión (CS1)
       </div>
@@ -387,7 +379,7 @@
   /* ── JOIN ── */
   async function joinSession() {
     const name = document.getElementById('uInput').value.trim();
-    task = document.getElementById('tSelect').value;
+    task = 'TASK-101';
     const err = document.getElementById('errBox');
     const btn = document.getElementById('joinBtn');
     if (!name) { showErr('Escribe tu nombre de usuario'); return; }
