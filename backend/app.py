@@ -1,8 +1,4 @@
-"""
-Backend Flask: Sesión de Pair Programming
-Historia de Usuario: Revisión colaborativa de tareas en tiempo real
-Fase: REFACTORIZACIÓN — Tests en Verde (CS1-CS8)
-"""
+
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -456,7 +452,33 @@ def guardar_historial(task_id):
 @app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok", "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+# ── ALIMENTANDO LOS TESTS CON UN QUERY (EL TUYO) ───────────
+@app.route("/api/sesion/<task_id>/tests", methods=["GET"])
+def obtener_tests(task_id):
+    """Devuelve la lista de tests válidos para que el frontend los renderice"""
+    return jsonify([
+        {"id": "cs1", "desc": "CS1 · Impedir que un tercer usuario se una (Límite 2)"},
+        {"id": "cs2", "desc": "CS2 · Indicador visual de conexión (En línea / Desconectado)"},
+        {"id": "cs3", "desc": "CS3 · Visualizar el mismo archivo en tiempo real"},
+        {"id": "cs4", "desc": "CS4 · Registro (log) con hora exacta de conexión/desconexión"},
+        {"id": "cs5", "desc": "CS5 · Visualizar la última conexión de la pareja"}
+    ])
 
+# ── QUERY EXCLUSIVO PARA LA PANTALLA DE JHAEL ───────────
+@app.route("/api/sesion/<task_id>/tests_jhael", methods=["GET"])
+def obtener_tests_jhael(task_id):
+    """Devuelve los 8 tests oficiales para el frontend de Jhael"""
+    return jsonify([
+        {"id": "cs1", "desc": "CS1 · 2 desarrolladores simultáneos"},
+        {"id": "cs2", "desc": "CS2 · Visualizar mismo archivo en tiempo real"},
+        {"id": "cs3", "desc": "CS3 · Mostrar autor de cada comentario"},
+        {"id": "cs4", "desc": "CS4 · Sección compartida de comentarios"},
+        {"id": "cs5", "desc": "CS5 · Sincronización automática de cambios"},
+        {"id": "cs6", "desc": "CS6 · Registrar fecha y hora (Timestamp)"},
+        {"id": "cs7", "desc": "CS7 · Mostrar estado de conexión"},
+        {"id": "cs8", "desc": "CS8 · Historial guardado junto a la tarea"}
+    ])
 
 if __name__ == "__main__":
+    print("🚀 Iniciando Servidor de Pair Programming...")
     app.run(debug=True, host="0.0.0.0", port=5000)
