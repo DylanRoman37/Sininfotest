@@ -36,7 +36,6 @@
         </div>
     </div>
 
-
     <div id="app-dashboard" class="max-w-6xl mx-auto space-y-6 p-6 hidden">
         
         <header class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
@@ -128,7 +127,7 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-2">Pestaña activa de Jhael</label>
+                            <label class="block text-xs font-medium text-slate-400 mb-2">Pestaña activa de <span class="text-pink-400">Jhael</span></label>
                             <select id="file-Jhael" onchange="actualizarArchivo()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-teal-500">
                                 <option value="auth_service.py">auth_service.py</option>
                                 <option value="controllers.py">controllers.py</option>
@@ -213,7 +212,7 @@
 
     <script>
         const URL_API = "http://localhost:5000/api";
-        let TASK_ID = "TASK-102"; // Se mantiene fija para no complicar la demostración
+        let TASK_ID = "TASK-102"; 
         let miNombre = ""; 
 
         const contenidoArchivos = {
@@ -222,16 +221,15 @@
             "database.py": `import os\nimport mysql.connector\n\ndef obtener_conexion():\n    print("Conectado a BD")`
         };
 
-        // 🟢 Carga la lista de CS desde el Query de Python
         async function cargarTests() {
             try {
                 const res = await fetch(`${URL_API}/sesion/${TASK_ID}/tests`);
                 const tests = await res.json();
                 const contenedor = document.getElementById('lista-tests');
                 contenedor.innerHTML = tests.map(t => `
-                    <div id="test-${t.id}" class="flex items-center gap-2 border border-slate-800 p-2 rounded transition-all duration-300">
-                        <span class="icon-check w-4 h-4 rounded border border-slate-600 flex items-center justify-center text-[8px]"></span>
-                        ${t.desc}
+                    <div id="test-${t.id}" class="flex items-center gap-3 border border-slate-800/80 bg-slate-900/50 p-2.5 rounded-lg transition-all duration-500 text-slate-500">
+                        <div class="icon-check w-4 h-4 rounded border border-slate-600 flex items-center justify-center text-[10px] font-bold transition-all duration-300"></div>
+                        <span class="text-[10px] leading-tight">${t.desc}</span>
                     </div>
                 `).join('');
             } catch (e) {
@@ -239,43 +237,36 @@
             }
         }
 
-        // 🟢 Activa el check verde en la condición que se haya cumplido
-        function validarTest(id) {
-            const testEl = document.getElementById(`test-${id}`);
-            if (testEl && !testEl.classList.contains('bg-emerald-500/10')) {
-                testEl.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
-                testEl.classList.remove('text-slate-500', 'border-slate-800');
-                const icon = testEl.querySelector('.icon-check');
+        function marcarCS(id) {
+            const el = document.getElementById(`test-${id}`);
+            if (el && !el.classList.contains('bg-emerald-500/10')) {
+                el.classList.replace('border-slate-800/80', 'border-emerald-500/30');
+                el.classList.replace('bg-slate-900/50', 'bg-emerald-500/10');
+                el.classList.replace('text-slate-500', 'text-emerald-400');
+                
+                const icon = el.querySelector('.icon-check');
                 icon.innerHTML = '✓';
-                icon.classList.add('bg-emerald-500', 'text-slate-900', 'border-emerald-500');
-                icon.classList.remove('border-slate-600');
+                icon.classList.replace('border-slate-600', 'border-emerald-500');
+                icon.classList.add('bg-emerald-500', 'text-slate-950');
             }
         }
 
+        // 🟢 SE ELIMINÓ EL BLOQUEO DE LA PANTALLA INICIAL
         function iniciarSesion() {
             const inputVal = document.getElementById('input-nombre').value.trim();
-            
-            if (!inputVal) {
-                alert("Por favor, ingresa tu nombre de desarrollador.");
-                return;
-            }
+            if (!inputVal) { alert("Por favor, ingresa tu nombre de desarrollador."); return; }
 
             miNombre = inputVal;
-
             document.getElementById('ui-nombre').innerText = miNombre;
             document.getElementById('ui-iniciales').innerText = miNombre.substring(0, 2).toUpperCase();
             document.getElementById('ui-label-file').innerText = miNombre;
-            document.getElementById('display-tarea').innerText = TASK_ID;
-
             document.getElementById('badge-dinamico').id = `badge-${miNombre}`;
-            document.getElementById('file-dinamico').id = `file-${miNombre}`;
 
             const loginPantalla = document.getElementById('pantalla-login');
             loginPantalla.style.opacity = '0';
             setTimeout(() => {
                 loginPantalla.classList.add('hidden');
                 document.getElementById('app-dashboard').classList.remove('hidden');
-                // Carga la lista de tests apenas entra
                 cargarTests();
             }, 300); 
         }
@@ -283,9 +274,7 @@
         async function conectar(usuario) {
             try {
                 const response = await fetch(`${URL_API}/sesion/${TASK_ID}/conectar`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({usuario: usuario})
+                    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({usuario: usuario})
                 });
                 const data = await response.json();
                 
@@ -293,14 +282,12 @@
                     const consola = document.getElementById('consola-logs');
                     const logElement = document.createElement('div');
                     logElement.className = "flex justify-between border-b border-rose-900/50 pb-1 gap-2 bg-rose-500/10 px-2 rounded mt-1";
-                    logElement.innerHTML = `<span><span class="text-rose-500 font-bold">⚠ BLOQUEADO:</span> Intento de ${usuario} rechazado.</span><span class="text-slate-600 font-mono text-[11px] mt-1">${obtenerHoraExacta()}</span>`;
+                    logElement.innerHTML = `<span><span class="text-rose-500 font-bold">⚠ BLOQUEADO:</span> Intento rechazado.</span><span class="text-slate-600 font-mono text-[11px] mt-1">${obtenerHoraExacta()}</span>`;
                     consola.appendChild(logElement);
                     consola.scrollTop = consola.scrollHeight;
                     
                     alert(`¡ACCESO DENEGADO!\nTu backend bloqueó a ${usuario} porque el cupo de Pair Programming ya está lleno.`);
-                    
-                    // 🟢 Validar CS1: Bloqueo tercer usuario
-                    validarTest('cs1');
+                    marcarCS('cs1'); // Validar CS1: Bloqueo tercer usuario
                     return;
                 }
 
@@ -308,29 +295,21 @@
                 if(badge) {
                     badge.className = "flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 text-[10px] px-2 py-1 rounded-full border border-emerald-500/20 font-semibold animate-pulse w-fit";
                     badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> En línea`;
-                    
-                    // 🟢 Validar CS2: Indicador visual
-                    validarTest('cs2');
+                    marcarCS('cs2'); // Indicador visual
                 }
                 
                 agregarLog(usuario, "Conectado");
                 actualizarArchivo();
-                
-                // 🟢 Validar CS4: Log exacto
-                validarTest('cs4');
-                // 🟢 Validar CS5: Ver conexión
-                validarTest('cs5');
+                marcarCS('cs4'); // Log exacto
                 
             } catch (e) {
-                alert("Error: Asegúrate de tener el app.py corriendo en la terminal.");
+                alert("Error de conexión con el servidor.");
             }
         }
 
         async function desconectar(usuario) {
             await fetch(`${URL_API}/sesion/${TASK_ID}/desconectar`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({usuario: usuario})
+                method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({usuario: usuario})
             });
 
             const badge = document.getElementById(`badge-${usuario}`);
@@ -342,14 +321,22 @@
             document.getElementById('ultima-conexion').innerText = `${usuario} (${obtenerHoraExacta()})`;
             agregarLog(usuario, "Desconectado");
             actualizarArchivo();
+            marcarCS('cs5'); // Última conexión
         }
 
         async function actualizarArchivo() {
-            const archJhael = document.getElementById('file-Jhael').value;
-            const archMio = document.getElementById(`file-${miNombre}`).value;
+            const archOtro = document.getElementById('file-Jhael').value;
+            const archMio = document.getElementById('file-dinamico').value;
 
-            await fetch(`${URL_API}/sesion/${TASK_ID}/abrir-archivo`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({usuario: 'Jhael', archivo: archJhael}) });
-            const res = await fetch(`${URL_API}/sesion/${TASK_ID}/abrir-archivo`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({usuario: miNombre, archivo: archMio}) });
+            await fetch(`${URL_API}/sesion/${TASK_ID}/abrir-archivo`, { 
+                method: 'POST', headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({usuario: 'Jhael', archivo: archOtro}) 
+            });
+            
+            const res = await fetch(`${URL_API}/sesion/${TASK_ID}/abrir-archivo`, { 
+                method: 'POST', headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({usuario: miNombre, archivo: archMio}) 
+            });
             const data = await res.json();
             
             const panel = document.getElementById('panel-sincronizacion');
@@ -369,9 +356,7 @@
                 tituloVisor.innerText = archMio;
                 visorCodigo.innerText = contenidoArchivos[archMio];
                 visorCodigo.className = "text-sm font-mono text-emerald-300";
-                
-                // 🟢 Validar CS3: Archivos sincronizados
-                validarTest('cs3');
+                marcarCS('cs3'); 
                 
             } else {
                 panel.className = "p-3 mb-4 rounded-xl border border-amber-500/20 bg-amber-500/5 flex items-center justify-between shadow-lg shadow-amber-500/5";
