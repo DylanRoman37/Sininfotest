@@ -94,7 +94,7 @@
     .back-link a{color:var(--dim);text-decoration:none;}
     .back-link a:hover{color:var(--accent);}
 
-    /* ── APP SHELL (hidden until logged in) ── */
+    /* ── APP SHELL ── */
     #appShell{display:none;flex:1;flex-direction:column;}
 
     /* topbar */
@@ -118,12 +118,11 @@
     .tb-title{font-size:.88rem;font-weight:700;color:var(--bright);}
     .tbRight{display:flex;align-items:center;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--accent);}
     
-    /* 🟢 CORRECCIÓN: Animación suave del punto de sincronización */
     .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 3s ease-in-out infinite;}
     @keyframes pulse{0%,100%{opacity:1; transform:scale(1)}50%{opacity:.6; transform:scale(1.1)}}
 
-    /* main grid */
-    .main{flex:1;display:grid;grid-template-columns:270px 1fr 290px;height:calc(100vh - 54px);overflow:hidden;}
+    /* 🟢 NUEVO GRID: Izquierda (280px), Centro-Código (1fr), Derecha-Chat (320px) */
+    .main{flex:1;display:grid;grid-template-columns:280px 1fr 320px;height:calc(100vh - 54px);overflow:hidden;}
 
     /* ── SIDEBAR LEFT ── */
     .sbl{background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:1.1rem;display:flex;flex-direction:column;gap:1.4rem;}
@@ -139,7 +138,7 @@
     .sdot.online{background:var(--accent);box-shadow:0 0 5px var(--accent);}
     .sdot.offline{background:var(--danger);}
 
-    /* 🟢 CORRECCIÓN: Selección de archivos */
+    /* files */
     .file-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:.9rem;margin-top:.7rem;}
     .file-row{display:flex;flex-direction:column;gap:.6rem;margin-top:.5rem;}
     .file-row select{
@@ -147,8 +146,6 @@
       padding:.6rem .7rem;color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:.75rem;outline:none;cursor:pointer;
     }
     .file-row select:focus{border-color:var(--accent);}
-    
-    /* 🟢 CORRECCIÓN: Botón "Abrir Archivo" más visible */
     .bsm{
       background:var(--accent); color:#07090f; border:none; border-radius:8px;
       padding:.6rem; font-family:'Syne',sans-serif; font-weight:800; font-size:.78rem;
@@ -164,16 +161,35 @@
     .f-name{color:var(--dim);}
 
     /* cs checklist */
-    .cs-list{display:flex;flex-direction:column;gap:.38rem;margin-top:.7rem;}
-    .cs-item{display:flex;align-items:center;gap:.55rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--dim);}
-    .cs-box{width:13px;height:13px;border-radius:3px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:.55rem;flex-shrink:0;transition:all .3s;}
+    .cs-list{display:flex;flex-direction:column;gap:.45rem;margin-top:.7rem;}
+    .cs-item{display:flex;align-items:center;gap:.55rem;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--dim); line-height: 1.2;}
+    .cs-box{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:.55rem;flex-shrink:0;transition:all .3s;}
     .cs-box.done{background:rgba(0,245,160,.12);border-color:var(--accent);color:var(--accent);}
 
     .btn-leave{background:rgba(255,82,82,.07);border:1px solid rgba(255,82,82,.18);color:var(--danger);border-radius:10px;padding:.62rem;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;width:100%;margin-top:auto;transition:all .2s;}
     .btn-leave:hover{background:rgba(255,82,82,.14);}
 
-    /* ── CHAT CENTER ── */
-    .chat{display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+    /* ── HISTORIAL MOVIDO A LA IZQUIERDA ── */
+    .h-list{overflow-y:auto;padding:.5rem;display:flex;flex-direction:column;gap:.45rem; max-height: 220px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; margin-top: 0.5rem;}
+    .h-item{padding:.5rem;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;gap:.22rem;animation:msgIn .2s ease;}
+    .h-top{display:flex;justify-content:space-between;align-items:center;}
+    .h-user{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;color:var(--accent);}
+    .h-time{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--dim);}
+    .h-chip{display:inline-block;padding:.09rem .38rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.55rem;font-weight:700;text-transform:uppercase;}
+    .ch-con{background:rgba(0,245,160,.09);color:var(--accent);}
+    .ch-dis{background:rgba(255,82,82,.09);color:var(--danger);}
+    .ch-cmt{background:rgba(255,255,255,.04);color:var(--dim);}
+    .ch-shr{background:rgba(79,158,255,.09);color:var(--accent2);}
+    .ch-fil{background:rgba(255,181,71,.09);color:var(--warn);}
+    .h-detail{font-size:.7rem;color:var(--text);line-height:1.4;word-break:break-word;}
+    .btn-save{background:rgba(0,245,160,.07);border:1px solid rgba(0,245,160,.18);color:var(--accent);border-radius:6px;padding:.2rem .4rem;font-family:'Syne',sans-serif;font-weight:700;font-size:.65rem;cursor:pointer;transition:all .2s;}
+    .btn-save:hover{background:rgba(0,245,160,.14);}
+
+    /* ── DERECHA: CHAT CENTER ── */
+    .sbr{background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+    .chat{display:flex;flex-direction:column;overflow:hidden;background:var(--surface);}
+    
+    /* tabs for chat */
     .tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);padding:0 1rem;}
     .tab{padding:.8rem 1.1rem;font-size:.8rem;font-weight:700;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:.38rem;}
     .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
@@ -185,7 +201,7 @@
     .empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:.8rem;}
     .empty-ico{font-size:2.2rem;}
 
-    .bubble{display:flex;gap:.65rem;max-width:85%;animation:msgIn .22s ease;}
+    .bubble{display:flex;gap:.65rem;max-width:90%;animation:msgIn .22s ease;}
     @keyframes msgIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
     .bubble.me{align-self:flex-end;flex-direction:row-reverse;}
 
@@ -218,25 +234,6 @@
     .tog-label input:checked+.tog{background:var(--accent);}
     .tog-label input:checked+.tog::after{transform:translateX(15px);}
     .hint{font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--dim);}
-
-    /* ── SIDEBAR RIGHT ── */
-    .sbr{background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
-    .sbr-head{padding:.9rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-    .sbr-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);}
-    .btn-save{background:rgba(0,245,160,.07);border:1px solid rgba(0,245,160,.18);color:var(--accent);border-radius:8px;padding:.32rem .65rem;font-family:'Syne',sans-serif;font-weight:700;font-size:.7rem;cursor:pointer;transition:all .2s;}
-    .btn-save:hover{background:rgba(0,245,160,.14);}
-    .h-list{flex:1;overflow-y:auto;padding:.75rem;display:flex;flex-direction:column;gap:.45rem;}
-    .h-item{padding:.65rem;background:var(--panel);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;gap:.22rem;animation:msgIn .2s ease;}
-    .h-top{display:flex;justify-content:space-between;align-items:center;}
-    .h-user{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;color:var(--accent);}
-    .h-time{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--dim);}
-    .h-chip{display:inline-block;padding:.09rem .38rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:700;text-transform:uppercase;}
-    .ch-con{background:rgba(0,245,160,.09);color:var(--accent);}
-    .ch-dis{background:rgba(255,82,82,.09);color:var(--danger);}
-    .ch-cmt{background:rgba(255,255,255,.04);color:var(--dim);}
-    .ch-shr{background:rgba(79,158,255,.09);color:var(--accent2);}
-    .ch-fil{background:rgba(255,181,71,.09);color:var(--warn);}
-    .h-detail{font-size:.76rem;color:var(--text);line-height:1.4;word-break:break-word;}
 
     ::-webkit-scrollbar{width:3px;}
     ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
@@ -292,7 +289,6 @@
 
     <div class="main">
       <div class="sbl">
-
         <div>
           <div class="sec-title">👥 Participantes — CS1 · CS7</div>
           <div class="p-list" id="pList">
@@ -303,7 +299,6 @@
         <div>
           <div class="sec-title">📂 Archivo en tiempo real — CS2</div>
           <div class="file-box">
-            
             <div class="file-row">
               <select id="fileInput">
                 <option value="auth_service.py">auth_service.py</option>
@@ -312,7 +307,6 @@
               </select>
               <button class="bsm" onclick="openFile()">Abrir Archivo →</button>
             </div>
-
             <div class="sync-badge" id="syncBadge">⏳ Sin archivos abiertos</div>
             <div class="f-list" id="fList"></div>
           </div>
@@ -320,22 +314,39 @@
 
         <div>
           <div class="sec-title">✅ Condiciones de satisfacción</div>
-          <div class="cs-list">
-            <div class="cs-item"><div class="cs-box" id="cs1">✓</div>CS1 · 2 devs simultáneos</div>
-            <div class="cs-item"><div class="cs-box" id="cs2">✓</div>CS2 · Mismo archivo RT</div>
-            <div class="cs-item"><div class="cs-box" id="cs3">✓</div>CS3 · Autor en comentario</div>
-            <div class="cs-item"><div class="cs-box" id="cs4">✓</div>CS4 · Sección compartida</div>
-            <div class="cs-item"><div class="cs-box" id="cs5">✓</div>CS5 · Auto-sincronización</div>
-            <div class="cs-item"><div class="cs-box" id="cs6">✓</div>CS6 · Timestamp</div>
-            <div class="cs-item"><div class="cs-box" id="cs7">✓</div>CS7 · Estado conexión</div>
-            <div class="cs-item"><div class="cs-box" id="cs8">✓</div>CS8 · Historial en tarea</div>
+          <div class="cs-list" id="lista-tests-jhael">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--dim);text-align:center;">Cargando tests del servidor...</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sec-title" style="display:flex; justify-content:space-between; align-items:center; border:none; padding:0; margin-top:0.5rem;">
+            <span>📋 Historial</span>
+            <button class="btn-save" onclick="saveHistory()">💾 Guardar</button>
+          </div>
+          <div class="h-list" id="hList">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--dim);text-align:center;padding:1rem 0;">
+              El historial aparecerá aquí
+            </div>
           </div>
         </div>
 
         <button class="btn-leave" onclick="leaveSession()">⏻ Salir de la sesión</button>
       </div>
 
-      <div class="chat">
+      <div style="flex: 1; display: flex; flex-direction: column; background: #0d1117; min-width: 0;">
+        <div style="background: #010409; padding: 0.7rem 1.2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #8b949e; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid var(--border);">
+          <div style="display:flex; gap: 6px;">
+            <div style="width:12px; height:12px; border-radius:50%; background:#ff5f56;"></div>
+            <div style="width:12px; height:12px; border-radius:50%; background:#ffbd2e;"></div>
+            <div style="width:12px; height:12px; border-radius:50%; background:#27c93f;"></div>
+          </div>
+          <span style="margin-left: 8px;" id="ide-filename">esperando_conexion.py</span>
+        </div>
+        <pre style="flex: 1; overflow: auto; padding: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #e6edf3; margin: 0; line-height: 1.6;"><code id="ide-code"># Esperando a que los desarrolladores abran un archivo...</code></pre>
+      </div>
+
+      <div class="sbr chat">
         <div class="tabs">
           <div class="tab active" id="tabG" onclick="switchTab('general')">
             💬 General <span class="tcnt" id="cntG">0</span>
@@ -354,7 +365,7 @@
 
         <div class="input-area">
           <div class="input-row">
-            <textarea class="tarea" id="cInput" placeholder="Escribe un comentario sobre el código…" rows="1"
+            <textarea class="tarea" id="cInput" placeholder="Escribe un comentario…" rows="1"
               onkeydown="onKey(event)"></textarea>
             <button class="btn-send" id="sendBtn" onclick="sendComment()" disabled>Enviar</button>
           </div>
@@ -362,24 +373,13 @@
             <label class="tog-label">
               <input type="checkbox" id="sharedChk"/>
               <span class="tog"></span>
-              Compartido (CS4)
+              Compartido
             </label>
-            <span class="hint">Enter envía · Shift+Enter nueva línea</span>
+            <span class="hint">Enter envía</span>
           </div>
         </div>
       </div>
 
-      <div class="sbr">
-        <div class="sbr-head">
-          <span class="sbr-title">📋 Historial — CS6 · CS8</span>
-          <button class="btn-save" onclick="saveHistory()">💾 Guardar</button>
-        </div>
-        <div class="h-list" id="hList">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--dim);text-align:center;padding:2rem 0;">
-            El historial aparecerá aquí
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -388,6 +388,30 @@
 <script>
   const API = 'http://127.0.0.1:5000/api';
   let me = null, task = 'TASK-101', tab = 'general', comments = [], poll = null;
+
+  /* 🟢 DICCIONARIO DE CÓDIGO REAL PARA MOSTRAR */
+  const fileContents = {
+      "auth_service.py": "import jwt\nfrom fastapi import HTTPException\n\ndef verificar_token(token: str):\n    try:\n        payload = jwt.decode(token, 'SECRET')\n        return payload\n    except:\n        raise HTTPException(status_code=401)",
+      "controllers.py": "from db import obtener_conexion\n\nclass UsuarioController:\n    def __init__(self):\n        self.db = obtener_conexion()\n        print('✅ Controlador inicializado')",
+      "database.py": "import os\nimport mysql.connector\n\ndef obtener_conexion():\n    print('Conectando a BD...')\n    return mysql.connector.connect(\n        host='localhost',\n        user='root',\n        password='***'\n    )"
+  };
+
+  /* ── FUNCIÓN PARA LEER DEL QUERY DE PYTHON EXCLUSIVO PARA JHAEL ── */
+  async function cargarTestsDinamicos() {
+    try {
+      const res = await fetch(`${API}/sesion/${task}/tests_jhael`);
+      const tests = await res.json();
+      const contenedor = document.getElementById('lista-tests-jhael');
+      contenedor.innerHTML = tests.map(t => `
+        <div class="cs-item">
+          <div class="cs-box" id="${t.id}"></div>
+          <span>${t.desc}</span>
+        </div>
+      `).join('');
+    } catch(e) {
+      console.log("No se pudo cargar los tests.");
+    }
+  }
 
   /* ── JOIN ── */
   async function joinSession() {
@@ -413,7 +437,10 @@
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('appShell').style.display = 'flex';
       document.getElementById('sendBtn').disabled = false;
-      markCS('cs1'); markCS('cs5');
+      
+      await cargarTestsDinamicos();
+      
+      markCS('cs7');
       toast(`✅ ${me} conectado`, 'ok');
       await refreshAll();
       poll = setInterval(refreshAll, 4000);
@@ -482,7 +509,6 @@
 
   /* ── OPEN FILE ── */
   async function openFile() {
-    // 🟢 CORRECCIÓN: Leemos el valor del <select>
     const f = document.getElementById('fileInput').value.trim();
     if (!f||!me) { toast('Selecciona un archivo','er'); return; }
     try {
@@ -511,7 +537,6 @@
       document.getElementById('sendBtn').disabled = true;
       await fetchEstado(); await fetchHistory();
       
-      // 🟢 Redirigir al inicio después de salir
       setTimeout(() => { window.location.href = "index.html"; }, 1500);
       
     } catch(e){}
@@ -537,8 +562,16 @@
   function renderParticipants(parts) {
     const el = document.getElementById('pList');
     const entries = Object.entries(parts);
-    if (!entries.length) { el.innerHTML='<div style="font-family:\'JetBrains Mono\',monospace;font-size:.73rem;color:var(--dim);padding:.8rem 0;text-align:center;">Sin participantes</div>'; return; }
-    markCS('cs7');
+    if (!entries.length) { 
+      el.innerHTML='<div style="font-family:\'JetBrains Mono\',monospace;font-size:.73rem;color:var(--dim);padding:.8rem 0;text-align:center;">Sin participantes</div>'; 
+      return; 
+    }
+    
+    const activos = entries.filter(([u, st]) => st === 'online').length;
+    if (activos >= 2) {
+      markCS('cs1');
+    }
+
     el.innerHTML = entries.map(([u,st])=>`
       <div class="p-item">
         <div class="p-avatar">${u.charAt(0).toUpperCase()}</div>
@@ -549,15 +582,37 @@
       </div>`).join('');
   }
 
-  /* ── RENDER FILES ── */
+  /* ── RENDER FILES (EDITOR DE CÓDIGO) ── */
   function renderFiles(files, sync) {
     const badge = document.getElementById('syncBadge');
     const list  = document.getElementById('fList');
     const entries = Object.entries(files);
-    if (!entries.length) { badge.textContent='⏳ Sin archivos abiertos'; badge.className='sync-badge'; list.innerHTML=''; return; }
+
+    const ideTitle = document.getElementById('ide-filename');
+    const ideCode = document.getElementById('ide-code');
+
+    if (!entries.length) { 
+      badge.textContent='⏳ Sin archivos abiertos'; badge.className='sync-badge'; list.innerHTML=''; 
+      ideTitle.textContent = "esperando_conexion.py";
+      ideCode.textContent = "# Esperando a que los desarrolladores abran un archivo...";
+      ideCode.style.color = "#8b949e";
+      return; 
+    }
+    
     list.innerHTML = entries.map(([u,f])=>`<div class="f-item"><span class="f-user">${esc(u)}</span><span class="f-name">${esc(f)}</span></div>`).join('');
-    if (sync) { badge.textContent='✅ Sincronizados — Mismo archivo'; badge.className='sync-badge ok'; markCS('cs2'); }
-    else       { badge.textContent='⚠️ Desincronizados — Archivos distintos'; badge.className='sync-badge'; }
+    
+    if (sync) { 
+      badge.textContent='✅ Sincronizados — Mismo archivo'; badge.className='sync-badge ok'; markCS('cs5'); 
+      const currentFile = entries[0][1];
+      ideTitle.textContent = currentFile;
+      ideCode.textContent = fileContents[currentFile] || "# Código fuente no encontrado";
+      ideCode.style.color = "#a5d6ff";
+    } else { 
+      badge.textContent='⚠️ Desincronizados — Archivos distintos'; badge.className='sync-badge'; 
+      ideTitle.textContent = "desincronizado.py";
+      ideCode.textContent = "# ⚠️ ADVERTENCIA DE PAIR PROGRAMMING\n# Los desarrolladores están viendo archivos distintos.\n# Sincronicen sus pestañas para visualizar el código en tiempo real (CS2).";
+      ideCode.style.color = "var(--dim)";
+    }
   }
 
   /* ── RENDER COMMENTS ── */
@@ -590,7 +645,6 @@
   function renderHistory(items) {
     const el = document.getElementById('hList');
     if (!items.length) return;
-    markCS('cs8');
     const chipMap = {conectado:'ch-con',desconectado:'ch-dis',comment:'ch-cmt',comment_shared:'ch-shr',abrir_archivo:'ch-fil'};
     el.innerHTML = items.map(i=>`
       <div class="h-item">
@@ -603,8 +657,15 @@
       </div>`).join('');
   }
 
-  /* ── HELPERS ── */
-  function markCS(id){ const e=document.getElementById(id); if(e) e.classList.add('done'); }
+  /* ── FUNCIÓN QUE DIBUJA EL CHECK SOLAMENTE CUANDO SE VALIDA ── */
+  function markCS(id){ 
+    const e = document.getElementById(id); 
+    if(e && !e.classList.contains('done')) {
+      e.classList.add('done');
+      e.innerHTML = '✓';
+    }
+  }
+
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function toast(msg,type=''){
     const t=document.getElementById('toast');
